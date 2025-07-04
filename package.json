@@ -1,6 +1,6 @@
 {
   "name": "github-profile-review-backend",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,9 @@
     "axios": "^1.6.8",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "puppeteer": "^22.0.0",              // For GitHub contribution graph scraping
+    "pdfkit": "^0.13.0"                  // For generating PDF reports on the server
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
