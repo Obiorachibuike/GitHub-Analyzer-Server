@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import axios from "axios";
 import dotenv from "dotenv";
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 import { GoogleGenAI } from "@google/genai";
 import puppeteer from "puppeteer";
 import fs from "fs";
