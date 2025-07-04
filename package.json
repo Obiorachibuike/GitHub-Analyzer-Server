@@ -1,7 +1,7 @@
 {
   "name": "github-profile-review-backend",
-  "version": "1.0.0",
-  "description": "Backend for AI-powered GitHub profile reviews using Gemini and GitHub API",
+  "version": "1.1.0",
+  "description": "Backend for AI-powered GitHub profile reviews using Gemini (Google GenAI)",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -9,16 +9,17 @@
   },
   "keywords": [
     "github",
-    "profile-review",
-    "gemini",
     "ai",
+    "gemini",
+    "google",
+    "profile-review",
     "express",
     "axios"
   ],
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
-    "@google/generative-ai": "^0.5.0",
+    "@google/genai": "^0.5.0",
     "axios": "^1.6.8",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
