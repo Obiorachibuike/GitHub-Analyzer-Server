@@ -10,7 +10,12 @@ app.use(express.json());
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post("/api/analyze", async (req, res) => {
+  console.log("✅ /api/analyze endpoint hit");
+
   const { profile, repos } = req.body;
+
+  console.log("📦 Incoming profile:", profile.login || profile.name);
+  console.log("📦 Repo count received:", repos.length);
 
   const prompt = `
 You're an expert GitHub career advisor AI. Analyze this developer’s GitHub profile:
@@ -30,11 +35,20 @@ Provide a smart and helpful review of their GitHub presence. Suggest what to imp
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
+
+    console.log("🧠 Gemini response generated:");
+    console.log("──────────────────────────────");
+    console.log(text);
+    console.log("──────────────────────────────");
+
     res.json({ message: text });
   } catch (err) {
-    console.error("Gemini Error:", err.message);
+    console.error("❌ Gemini Error:", err.message);
     res.status(500).json({ error: "Failed to generate AI insights." });
   }
 });
 
-app.listen(5000, () => console.log("Server running on http://localhost:5000"));
+app.listen(5000, () => {
+  console.log("🚀 Server running on http://localhost:5000");
+  console.log("📡 POST /api/analyze is ready to receive requests");
+});
