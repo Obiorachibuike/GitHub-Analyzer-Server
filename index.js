@@ -1,16 +1,15 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenAI } = require("@google/genai");
 require("dotenv").config();
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Analyze GitHub profile based on username
 app.post("/api/analyze", async (req, res) => {
   const { username } = req.body;
 
@@ -46,13 +45,16 @@ ${topRepos.map(repo => `- ${repo.name}: ${repo.description || "No description"}`
 Provide a smart and helpful review of their GitHub presence. Suggest what to improve, and how to stand out more.
 `;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent(prompt);
-    const text = await result.response.text();
+    const response = await ai.models.generateContent({
+      model: "gemini-1.5-flash", // or "gemini-1.5-pro"
+      contents: [{ role: "user", parts: [{ text: prompt }] }]
+    });
 
-    console.log("✅ Gemini analysis generated.");
+    const aiText = response.candidates?.[0]?.content?.parts?.[0]?.text || "No response from Gemini";
+
+    console.log("✅ Gemini response generated");
     res.json({
-      message: text,
+      message: aiText,
       profile: {
         login: profile.login,
         name: profile.name,
