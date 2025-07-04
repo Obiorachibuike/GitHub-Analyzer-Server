@@ -1,12 +1,14 @@
-const express = require("express");
-const cors = require("cors");
-const axios = require("axios");
-const { GoogleGenAI } = require("@google/genai");
-require("dotenv").config();
+import express from "express";
+import cors from "cors";
+import axios from "axios";
+import dotenv from "dotenv";
+import { GoogleGenAI } from "@google/genai";
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: "1mb" }));
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -46,13 +48,14 @@ Provide a smart and helpful review of their GitHub presence. Suggest what to imp
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash", // or "gemini-1.5-pro"
+      model: "gemini-1.5-flash",
       contents: [{ role: "user", parts: [{ text: prompt }] }]
     });
 
     const aiText = response.candidates?.[0]?.content?.parts?.[0]?.text || "No response from Gemini";
 
     console.log("✅ Gemini response generated");
+
     res.json({
       message: aiText,
       profile: {
@@ -69,6 +72,7 @@ Provide a smart and helpful review of their GitHub presence. Suggest what to imp
   }
 });
 
-app.listen(5000, () => {
-  console.log("🚀 Server is running on http://localhost:5000");
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
