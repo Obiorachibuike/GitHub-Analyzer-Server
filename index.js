@@ -5,17 +5,30 @@ require("dotenv").config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+
+// 🧠 Log request size before parsing
+app.use((req, res, next) => {
+  req.on('data', chunk => {
+    req._bodySize = (req._bodySize || 0) + chunk.length;
+  });
+  req.on('end', () => {
+    console.log(`📏 Request body size: ${(req._bodySize || 0) / 1024} KB`);
+  });
+  next();
+});
+
+// 🚀 Increase payload size limit
+app.use(express.json({ limit: '5mb' }));
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// 📍 Main route
 app.post("/api/analyze", async (req, res) => {
-  console.log("✅ /api/analyze endpoint hit");
+  console.log("✅ /api/analyze hit");
 
   const { profile, repos } = req.body;
-
-  console.log("📦 Incoming profile:", profile.login || profile.name);
-  console.log("📦 Repo count received:", repos.length);
+  console.log("👤 Username:", profile?.login || profile?.name);
+  console.log("📦 Repos received:", repos?.length);
 
   const prompt = `
 You're an expert GitHub career advisor AI. Analyze this developer’s GitHub profile:
@@ -36,11 +49,7 @@ Provide a smart and helpful review of their GitHub presence. Suggest what to imp
     const response = await result.response;
     const text = response.text();
 
-    console.log("🧠 Gemini response generated:");
-    console.log("──────────────────────────────");
-    console.log(text);
-    console.log("──────────────────────────────");
-
+    console.log("✅ Gemini response:\n", text.slice(0, 300), '...'); // only log first 300 chars
     res.json({ message: text });
   } catch (err) {
     console.error("❌ Gemini Error:", err.message);
@@ -48,7 +57,15 @@ Provide a smart and helpful review of their GitHub presence. Suggest what to imp
   }
 });
 
+// 🛑 Custom error handler for oversized requests
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.too.large') {
+    console.error("🚫 Payload too large:", (req._bodySize || 0) / 1024, "KB");
+    return res.status(413).json({ error: "Payload too large. Please try again with fewer repositories." });
+  }
+  next(err);
+});
+
 app.listen(5000, () => {
   console.log("🚀 Server running on http://localhost:5000");
-  console.log("📡 POST /api/analyze is ready to receive requests");
 });
