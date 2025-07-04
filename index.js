@@ -22,10 +22,17 @@ app.post("/api/analyze", async (req, res) => {
   try {
     console.log(`🔍 Fetching GitHub data for user: @${username}`);
 
+    const headers = {
+      Authorization: `token ${process.env.GITHUB_TOKEN}`,
+      "User-Agent": "AI-GitHub-Reviewer"
+    };
+
     const [profileRes, reposRes] = await Promise.all([
-      axios.get(`https://api.github.com/users/${username}`),
-      axios.get(`https://api.github.com/users/${username}/repos`)
+      axios.get(`https://api.github.com/users/${username}`, { headers }),
+      axios.get(`https://api.github.com/users/${username}/repos`, { headers })
     ]);
+
+    console.log("✅ GitHub API Rate Limit Remaining:", profileRes.headers["x-ratelimit-remaining"]);
 
     const profile = profileRes.data;
     const repos = reposRes.data;
@@ -66,9 +73,24 @@ Provide a smart and helpful review of their GitHub presence. Suggest what to imp
         top_repo: topRepos[0]?.name || "N/A"
       }
     });
+
   } catch (err) {
-    console.error("❌ Error during analysis:", err.message);
-    res.status(500).json({ error: "Failed to analyze profile." });
+    if (axios.isAxiosError(err)) {
+      const status = err.response?.status;
+
+      // GitHub User Not Found
+      if (status === 404) {
+        return res.status(404).json({ error: `GitHub user "${username}" not found.` });
+      }
+
+      // Rate limit or token issue
+      if (status === 403) {
+        return res.status(403).json({ error: "GitHub rate limit exceeded or access forbidden. Use a valid token." });
+      }
+    }
+
+    console.error("❌ Error during analysis:", err.message || err);
+    res.status(500).json({ error: "Internal server error. Please try again later." });
   }
 });
 
