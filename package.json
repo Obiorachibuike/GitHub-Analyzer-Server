@@ -1,11 +1,12 @@
 {
   "name": "github-profile-review-backend",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Backend for AI-powered GitHub profile reviews using Gemini (Google GenAI)",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "postinstall": "npm install @google/genai"
   },
   "keywords": [
     "github",
